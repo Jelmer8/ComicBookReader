@@ -4,7 +4,7 @@ import xyz.jelmer8.models.BookModel;
 import xyz.jelmer8.models.RarBookModel;
 import xyz.jelmer8.models.ZipBookModel;
 import xyz.jelmer8.views.ComicBookView;
-import xyz.jelmer8.views.View;
+import xyz.jelmer8.views.MainMenuView;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -28,7 +27,7 @@ import java.util.stream.Stream;
 public class Controller {
 
     /** The starting view, main menu. */
-    private final View mainMenuView;
+    private final MainMenuView mainMenuView;
 
     /** The view where the user can read the comic book. */
     private final ComicBookView comicBookView;
@@ -49,7 +48,7 @@ public class Controller {
      * @param comicBookView the comic book view
      * @param cardLayout the cardLayout of the frame
      */
-    public Controller(HashMap<String, BookModel> modelMap, final View view,
+    public Controller(HashMap<String, BookModel> modelMap, final MainMenuView view,
                       final ComicBookView comicBookView,
                       final CardLayout cardLayout) {
         this.bookModelMap = modelMap;
@@ -62,7 +61,7 @@ public class Controller {
             try {
                 loadBooks();
             } catch (Exception ex) {
-                mainMenuView.setInfoMessage(View.MessageType.ERROR,
+                mainMenuView.setInfoMessage(MainMenuView.MessageType.ERROR,
                         "Error: " + ex);
             }
         });
@@ -115,7 +114,7 @@ public class Controller {
 
             // If no books are found at the provided path, show error message
             if (books.isEmpty()) {
-                mainMenuView.setInfoMessage(View.MessageType.ERROR,
+                mainMenuView.setInfoMessage(MainMenuView.MessageType.ERROR,
                         "No books found in specified path.");
                 return;
             }
@@ -130,10 +129,10 @@ public class Controller {
             mainMenuView.setBooksInPanel(labels, buttons);
 
             // Show success message
-            mainMenuView.setInfoMessage(View.MessageType.INFO,
+            mainMenuView.setInfoMessage(MainMenuView.MessageType.INFO,
                     "Books loaded: " + books.size());
         } catch (Exception e) {
-            mainMenuView.setInfoMessage(View.MessageType.ERROR, "Error: " + e);
+            mainMenuView.setInfoMessage(MainMenuView.MessageType.ERROR, "Error: " + e);
         }
     }
 
@@ -184,7 +183,7 @@ public class Controller {
         } else if (bookPath.endsWith(".cbr")) {
             bookModel = new RarBookModel(bookPath);
         } else {
-            mainMenuView.setInfoMessage(View.MessageType.ERROR,
+            mainMenuView.setInfoMessage(MainMenuView.MessageType.ERROR,
                     "Error: Unsupported file extension");
             return; // If there's an error, return
         }
@@ -192,7 +191,7 @@ public class Controller {
         try {
             bookModel.decompressBook();
         } catch (Exception ex) {
-            mainMenuView.setInfoMessage(View.MessageType.ERROR,
+            mainMenuView.setInfoMessage(MainMenuView.MessageType.ERROR,
                     "Error: " + ex);
             return; // If there's an error, return
         }
@@ -222,7 +221,7 @@ public class Controller {
         try {
             comicBookView.setComicBookImage(bookModel.getBookImage(-1));
         } catch (Exception e) {
-            mainMenuView.setInfoMessage(View.MessageType.ERROR,
+            mainMenuView.setInfoMessage(MainMenuView.MessageType.ERROR,
                     "Error occurred while loading the book");
             return; // If there's an error, return
         }
@@ -230,7 +229,7 @@ public class Controller {
 
         // Switch to the comic book view
         mainCardLayout.next(mainMenuView.getParent());
-        mainMenuView.setInfoMessage(View.MessageType.EMPTY, "");
+        mainMenuView.setInfoMessage(MainMenuView.MessageType.EMPTY, "");
         comicBookView.resetImagePan();
     }
 

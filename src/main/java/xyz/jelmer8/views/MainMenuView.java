@@ -16,7 +16,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 
-public class View extends Panel {
+public class MainMenuView extends Panel {
 
     /** Enum to represent the type of message in the message label. */
     public enum MessageType {
@@ -44,7 +44,7 @@ public class View extends Panel {
      * Constructor for the View class.
      * @param viewSize The size of the view panel
      */
-    public View(final Dimension viewSize) {
+    public MainMenuView(final Dimension viewSize) {
         setSize(viewSize);
         setLayout(new FlowLayout());
 

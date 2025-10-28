@@ -1,0 +1,92 @@
+﻿@startuml
+  ' ComicBookReader - class diagram (based on current source)
+
+  package "xyz.jelmer8.controllers" {
+    class Controller {
+      - mainMenuView : MainMenuView
+      - comicBookView : ComicBookView
+      - bookModelMap : HashMap<String, BookModel>
+      - currentBookPath : String
+      - mainCardLayout : CardLayout
+      + loadBooks()
+      + loadBook(bookPath : String)
+      + createBookModel(bookPath : String)
+      + getBooksFromPath() : List<Path>
+      + checkFileExtension(filePath : String) : boolean
+    }
+  }
+
+  package "xyz.jelmer8.models" {
+    abstract class BookModel {
+      - images : List<ImageModel>
+      + decompressBook() throws Exception
+      + getBookImage(index : int) : ImageModel
+      + getPreviousBookImage() : ImageModel
+      + getNextBookImage() : ImageModel
+    }
+
+    class RarBookModel {
+      + RarBookModel(path : String)
+      + decompressBook() throws Exception
+    }
+
+    class ZipBookModel {
+      + ZipBookModel(path : String)
+      + decompressBook() throws Exception
+    }
+
+    class ImageModel {
+      - width : int
+      - height : int
+      - data : byte[]
+      + getWidth() : int
+      + getHeight() : int
+      + getData() : byte[]
+    }
+  }
+
+  package "xyz.jelmer8.views" {
+    class MainMenuView {
+      + addButtonActionListener(listener : ActionListener)
+      + setInfoMessage(type : MessageType, message : String)
+      + setBooksInPanel(labels : List<Label>, buttons : List<Button>)
+      + getPathTextAreaText() : String
+      .. MessageType { INFO, ERROR, EMPTY }
+    }
+
+    class ComicBookView {
+      + setButtonListeners(stopListener, prevListener, nextListener)
+      + clearImage()
+      + setComicBookImage(image : ImageModel)
+      + setPanelListener(motionAdapter, mouseAdapter)
+      + setMousePressed(xOnScreen : int, yOnScreen : int)
+      + panComicBookImage(xOnScreen : int, yOnScreen : int)
+      + resizeComicBookImage()
+      + resetImagePan()
+    }
+  }
+
+  class Main {
+    + main(args : String[])
+  }
+
+  ' Inheritance
+  xyz.jelmer8.models.BookModel <|-- xyz.jelmer8.models.RarBookModel
+  xyz.jelmer8.models.BookModel <|-- xyz.jelmer8.models.ZipBookModel
+
+  ' Associations / dependencies
+  xyz.jelmer8.controllers.Controller o-- xyz.jelmer8.views.MainMenuView : uses
+  xyz.jelmer8.controllers.Controller o-- xyz.jelmer8.views.ComicBookView : uses
+  xyz.jelmer8.controllers.Controller *-- xyz.jelmer8.models.BookModel : manages
+  xyz.jelmer8.models.BookModel *-- xyz.jelmer8.models.ImageModel : images
+  xyz.jelmer8.views.ComicBookView ..> xyz.jelmer8.models.ImageModel : displays
+
+  Main ..> xyz.jelmer8.controllers.Controller
+  Main ..> xyz.jelmer8.views.MainMenuView
+  Main ..> xyz.jelmer8.views.ComicBookView
+
+  ' External types (UI)
+  class "java.awt.CardLayout" as CardLayout
+  CardLayout <.. xyz.jelmer8.controllers.Controller
+
+  @enduml

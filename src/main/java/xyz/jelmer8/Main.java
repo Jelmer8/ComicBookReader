@@ -4,7 +4,7 @@ package xyz.jelmer8;
 import xyz.jelmer8.controllers.Controller;
 import xyz.jelmer8.models.BookModel;
 import xyz.jelmer8.views.ComicBookView;
-import xyz.jelmer8.views.View;
+import xyz.jelmer8.views.MainMenuView;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -38,7 +38,7 @@ public class Main {
 
         // Create the modelSet, views and controller
         HashMap<String, BookModel> modelMap = new HashMap<>();
-        View mainMenuView = new View(DEFAULTVIEWSIZE);
+        MainMenuView mainMenuView = new MainMenuView(DEFAULTVIEWSIZE);
         ComicBookView comicBookView = new ComicBookView(DEFAULTVIEWSIZE);
 
         new Controller(modelMap, mainMenuView, comicBookView, cardLayout);
