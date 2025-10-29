@@ -1,0 +1,29 @@
+﻿@startuml
+title ComicBookReader - State Transition Diagram
+
+skinparam state {
+  BackgroundColor LightGray
+}
+
+[*] -> MainMenu
+
+state MainMenu {
+    [*] --> InitialState
+
+    InitialState --> EnterPath : User enters path
+
+    EnterPath --> InitialState : Error, return and show info
+
+    EnterPath -> ListBooks : No error, show books
+}
+
+
+ListBooks -> ViewPage : Select book from list, no error
+
+ListBooks --> ListBooks : Select book from list, error opening book
+
+ViewPage --> ViewPage : View next page / previous page
+
+ViewPage --> ListBooks : Press 'stop' button
+
+@enduml

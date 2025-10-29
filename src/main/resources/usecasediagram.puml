@@ -1,0 +1,47 @@
+﻿@startuml
+left to right direction
+skinparam usecase {
+  BackgroundColor<<MainMenu>> LightBlue
+  BackgroundColor<<Viewer>> LightYellow
+}
+
+actor User
+actor "File System" as FS
+
+
+rectangle "Main Menu" {
+usecase "Enter Book Path" as EnterPath
+usecase "Load Books" as LoadBooks
+usecase "Display Book List" as DisplayList
+usecase "Show Message (info/error)" as ShowMessage
+usecase "Open Book" as OpenBook
+}
+
+rectangle "Comic Book Viewer" {
+
+usecase "View Page" as ViewPage
+usecase "Next Page" as NextPage
+usecase "Previous Page" as PrevPage
+usecase "Stop/Close Viewer" as StopViewer
+}
+
+' Actor interactions
+User --> EnterPath
+User --> LoadBooks
+User --> OpenBook
+User --> ViewPage
+User --> NextPage
+User --> PrevPage
+User --> StopViewer
+
+' System interactions / includes
+LoadBooks ..> DisplayList : <<extends>>
+LoadBooks ..> ShowMessage : <<include>>
+OpenBook ..> ViewPage : <<extends>>
+ViewPage ..> ShowMessage : <<extends>>
+
+' External file access
+LoadBooks --> FS : "read books from path"
+OpenBook --> FS : "read images"
+
+@enduml

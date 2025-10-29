@@ -55,10 +55,10 @@
     }
 
     class ComicBookView {
-      + setButtonListeners(stopListener, prevListener, nextListener)
+      + setButtonListeners(stopListener : ActionListener, prevListener : ActionListener, nextListener: ActionListener)
       + clearImage()
       + setComicBookImage(image : ImageModel)
-      + setPanelListener(motionAdapter, mouseAdapter)
+      + setPanelListener(motionAdapter : MouseMotionAdapter, mouseAdapter : MouseAdapter)
       + setMousePressed(xOnScreen : int, yOnScreen : int)
       + panComicBookImage(xOnScreen : int, yOnScreen : int)
       + resizeComicBookImage()
@@ -66,8 +66,10 @@
     }
   }
 
-  class Main {
-    + main(args : String[])
+  package "xyz.jelmer8" {
+    class Main {
+      + main(args : String[])
+    }
   }
 
   ' Inheritance
@@ -77,7 +79,7 @@
   ' Associations / dependencies
   xyz.jelmer8.controllers.Controller o-- xyz.jelmer8.views.MainMenuView : uses
   xyz.jelmer8.controllers.Controller o-- xyz.jelmer8.views.ComicBookView : uses
-  xyz.jelmer8.controllers.Controller *-- xyz.jelmer8.models.BookModel : manages
+  xyz.jelmer8.controllers.Controller o-- xyz.jelmer8.models.BookModel : manages
   xyz.jelmer8.models.BookModel *-- xyz.jelmer8.models.ImageModel : images
   xyz.jelmer8.views.ComicBookView ..> xyz.jelmer8.models.ImageModel : displays
 
@@ -87,6 +89,6 @@
 
   ' External types (UI)
   class "java.awt.CardLayout" as CardLayout
-  CardLayout <.. xyz.jelmer8.controllers.Controller
+  Controller ..> CardLayout
 
   @enduml
