@@ -1,0 +1,146 @@
+@startuml
+actor User
+participant "Main\n`src/main/java/xyz/jelmer8/Main.java`" as Main
+participant "Controller\n`src/main/java/xyz/jelmer8/controllers/Controller.java`" as Controller
+participant "MainMenuView\n`src/main/java/xyz/jelmer8/views/MainMenuView.java`" as MainMenuView
+participant "ComicBookView\n`src/main/java/xyz/jelmer8/views/ComicBookView.java`" as ComicBookView
+participant "BookModel\n`src/main/java/xyz/jelmer8/models/BookModel.java`" as BookModel
+participant "RarBookModel\n`src/main/java/xyz/jelmer8/models/RarBookModel.java`" as RarBookModel
+participant "ZipBookModel\n`src/main/java/xyz/jelmer8/models/ZipBookModel.java`" as ZipBookModel
+participant "ImageModel\n`src/main/java/xyz/jelmer8/models/ImageModel.java`" as ImageModel
+participant "ImageIO" as ImageIO
+participant "Archive\n(com.github.junrar.Archive)" as Archive
+participant "FileHeader" as FileHeader
+participant "ZipFile" as ZipFile
+participant "ZipEntry" as ZipEntry
+
+== Application start ==
+Main -> Controller : new Controller()
+activate Controller
+Controller -> MainMenuView : new MainMenuView(controller)
+activate MainMenuView
+
+User -> MainMenuView : open comic (select filePath)
+MainMenuView -> Controller : openComic(filePath)
+
+== Controller delegates to BookModel ==
+Controller -> BookModel : load(filePath)
+activate BookModel
+
+BookModel -> BookModel : detect archive type (extension)
+alt fileName ends with .cbr/.rar
+    BookModel -> RarBookModel : decompressBook(filePath)
+    activate RarBookModel
+
+    RarBookModel -> Archive : new Archive(new File(filePath))
+    activate Archive
+    Archive --> RarBookModel : archive
+    deactivate Archive
+
+    RarBookModel -> Archive : getFileHeaders()
+    activate Archive
+    Archive --> RarBookModel : List<FileHeader> headers
+    deactivate Archive
+
+    RarBookModel -> RarBookModel : sort(headers)
+    loop for each FileHeader in headers
+        RarBookModel -> FileHeader : getFileName()
+        FileHeader --> RarBookModel : fileName
+
+        alt fileName ends with .gif
+            RarBookModel -> Archive : getInputStream(header)
+            activate Archive
+            Archive --> RarBookModel : InputStream is
+            deactivate Archive
+
+            RarBookModel -> RarBookModel : addGifToBookImages(is)
+        else fileName ends with .jpg or .jpeg
+            RarBookModel -> Archive : getInputStream(header)
+            activate Archive
+            Archive --> RarBookModel : InputStream is
+            deactivate Archive
+
+            RarBookModel -> ImageIO : read(is)
+            activate ImageIO
+            ImageIO --> RarBookModel : BufferedImage img
+            deactivate ImageIO
+
+            RarBookModel -> ImageModel : new ImageModel(img)
+            activate ImageModel
+            ImageModel --> RarBookModel : imageModel
+            deactivate ImageModel
+
+            RarBookModel -> BookModel : addImage(imageModel)
+        else
+            note right of RarBookModel : skip non-image
+        end
+    end
+    RarBookModel --> BookModel : return images
+    deactivate RarBookModel
+
+else fileName ends with .cbz/.zip
+    BookModel -> ZipBookModel : decompressBook(filePath)
+    activate ZipBookModel
+
+    ZipBookModel -> ZipFile : new ZipFile(filePath)
+    activate ZipFile
+    ZipFile --> ZipBookModel : zipFile
+    deactivate ZipFile
+
+    ZipBookModel -> ZipFile : entries()
+    activate ZipFile
+    ZipFile --> ZipBookModel : Enumeration<ZipEntry> entries
+    deactivate ZipFile
+
+    loop for each ZipEntry in entries
+        ZipBookModel -> ZipEntry : getName()
+        ZipEntry --> ZipBookModel : entryName
+
+        alt fileName ends with .gif
+            ZipBookModel -> ZipFile : getInputStream(entry)
+            activate ZipFile
+            ZipFile --> ZipBookModel : InputStream is
+            deactivate ZipFile
+
+            ZipBookModel -> ZipBookModel : addGifToBookImages(is)
+        else fileName ends with .jpg or .jpeg
+            ZipBookModel -> ZipFile : getInputStream(entry)
+            activate ZipFile
+            ZipFile --> ZipBookModel : InputStream is
+            deactivate ZipFile
+
+            ZipBookModel -> ImageIO : read(is)
+            activate ImageIO
+            ImageIO --> ZipBookModel : BufferedImage img
+            deactivate ImageIO
+
+            ZipBookModel -> ImageModel : new ImageModel(img)
+            activate ImageModel
+            ImageModel --> ZipBookModel : imageModel
+            deactivate ImageModel
+
+            ZipBookModel -> BookModel : addImage(imageModel)
+        else
+            note right of ZipBookModel : skip non-image
+        end
+    end
+    ZipBookModel --> BookModel : return images
+    deactivate ZipBookModel
+end
+
+BookModel --> Controller : bookImages
+deactivate BookModel
+
+== Controller updates view ==
+Controller -> ComicBookView : display(bookImages)
+activate ComicBookView
+ComicBookView -> ComicBookView : render first page
+
+User -> ComicBookView : nextPage / prevPage
+ComicBookView -> Controller : pageChange(event)
+Controller -> ComicBookView : update view (show image at index)
+
+deactivate ComicBookView
+deactivate MainMenuView
+deactivate Controller
+@enduml

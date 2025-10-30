@@ -1,0 +1,46 @@
+@startuml
+title Component diagram — `src/main/java/xyz/jelmer8`
+
+package "xyz.jelmer8" {
+  package "controllers" {
+    component Controller <<controller>> as Controller
+  }
+  package "views" {
+    component MainMenuView <<view>> as MainMenuView
+    component ComicBookView <<view>> as ComicBookView
+  }
+  package "models" {
+    component BookModel <<model>> as BookModel
+    component RarBookModel <<model>> as RarBookModel
+    component ZipBookModel <<model>> as ZipBookModel
+    component ImageModel <<data>> as ImageModel
+  }
+  component Main <<application>> as Main
+}
+
+
+' External libraries / JDK
+component "ImageIO\n(javax.imageio.ImageIO)" as ImageIO
+component "Archive\n(com.github.junrar.Archive)" as Archive
+component "ZipFile\n(net.lingala.zip4j.ZipFile)" as ZipFile
+
+' Primary relationships
+Main --> Controller : creates
+Controller --> MainMenuView : instantiates / commands
+Controller --> ComicBookView : updates / navigates
+Controller --> BookModel : load(filePath)
+MainMenuView --> Controller : user actions
+ComicBookView --> Controller : page change events
+
+' Model delegation and I/O
+BookModel --> RarBookModel : decompress .cbr/.rar
+BookModel --> ZipBookModel : decompress .cbz/.zip
+RarBookModel --> Archive : open / iterate headers
+ZipBookModel --> ZipFile : open / iterate entries
+RarBookModel --> ImageIO : read images
+ZipBookModel --> ImageIO : read images
+RarBookModel --> ImageModel : create instances
+ZipBookModel --> ImageModel : create instances
+ComicBookView --> ImageModel : render / display
+
+@enduml

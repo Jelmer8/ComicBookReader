@@ -1,0 +1,15 @@
+@startuml
+title Deployment diagram — src/main/java/xyz/jelmer8
+
+node "User Machine" {
+  node "Java Runtime Environment" as JRE
+  artifact "ComicBookReader.jar\n(Java AWT & Swing GUI)" as Jar
+  JRE --> Jar
+}
+
+node "Local File System" {
+  folder "Comic books\n(.nhlcomic/.cbr/.cbz)" as ComicBookFolder
+}
+
+Jar --> ComicBookFolder : read
+@enduml
