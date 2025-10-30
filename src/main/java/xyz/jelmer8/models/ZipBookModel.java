@@ -1,9 +1,13 @@
 package xyz.jelmer8.models;
 
 import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.AbstractFileHeader;
+import net.lingala.zip4j.model.FileHeader;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
 
 public class ZipBookModel extends BookModel {
 
@@ -19,7 +23,12 @@ public class ZipBookModel extends BookModel {
      */
     public void decompressBook() throws IOException {
         ZipFile zipFile = new ZipFile(this.bookPath);
-        zipFile.getFileHeaders().forEach(fileHeader -> {
+
+        List<FileHeader> fileHeaderList = zipFile.getFileHeaders();
+
+        fileHeaderList.sort(Comparator.comparing(AbstractFileHeader::getFileName));
+
+        for (FileHeader fileHeader : fileHeaderList) {
             String fileName = fileHeader.getFileName();
 
             if (fileName.endsWith(".gif")) {
@@ -39,7 +48,7 @@ public class ZipBookModel extends BookModel {
                     e.printStackTrace();
                 }
             }
-        });
+        }
 
         zipFile.close();
     }

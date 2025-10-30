@@ -8,6 +8,8 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Comparator;
+import java.util.List;
 
 public class RarBookModel extends BookModel {
 
@@ -23,22 +25,22 @@ public class RarBookModel extends BookModel {
      */
     public void decompressBook() throws RarException, IOException {
         final Archive archive = new Archive(new File(this.bookPath));
-        while (true) {
-            FileHeader fileHeader = archive.nextFileHeader();
 
-            // Break if there are no more files
-            if (fileHeader == null) {
-                break;
-            }
+        List<FileHeader> fileHeaderList = archive.getFileHeaders();
 
-            if (fileHeader.getFileName().endsWith(".gif")) {
+        fileHeaderList.sort(Comparator.comparing(FileHeader::getFileName));
+
+        for (FileHeader fileHeader : fileHeaderList) {
+            String fileName = fileHeader.getFileName();
+
+            if (fileName.endsWith(".gif")) {
                 addGifToBookImages(archive.getInputStream(fileHeader));
                 continue;
             }
 
             // Continue if file does not end with .jpg or .jpeg
-            if ((!fileHeader.getFileName().endsWith(".jpg")
-                    && !fileHeader.getFileName().endsWith(".jpeg"))) {
+            if ((!fileName.endsWith(".jpg")
+                    && !fileName.endsWith(".jpeg"))) {
                 continue;
             }
 
